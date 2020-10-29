@@ -1,0 +1,39 @@
+{
+  "name": "@danielfsousa/create",
+  "version": "1.0.0",
+  "description": "Scripts to bootstrap my javascript/typescript templates using `npm init` command",
+  "bin": "bin/create.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danielfsousa/npm-templates.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/danielfsousa/npm-templates/issues"
+  },
+  "homepage": "https://github.com/danielfsousa/npm-templates#readme",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "command-exists": "^1.2.9",
+    "commander": "^6.2.0",
+    "decompress": "^4.2.1",
+    "fs-extra": "^9.0.1",
+    "got": "^11.8.0",
+    "prompts": "^2.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.12.1",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-config-standard": "^15.0.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.2",
+    "prettier": "^2.1.2"
+  }
+}
