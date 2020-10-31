@@ -6,6 +6,7 @@ program
   .version(pkg.version)
   // .name('npm init @danielfsousa') //
   .arguments('[template] [project-directory]')
+  // TODO:
   .option('-y, --yes', 'Skip questions')
 
 const getQuestions = projects => [
