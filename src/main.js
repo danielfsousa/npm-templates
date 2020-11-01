@@ -4,14 +4,16 @@ const got = require('got')
 const chalk = require('chalk')
 const Stream = require('stream')
 const decompress = require('decompress')
-const { spawnSync } = require('child_process')
+const validateProjectName = require('validate-npm-package-name')
+const { spawnSync, execSync } = require('child_process')
 const { promisify } = require('util')
 const { sync: commandExistsSync } = require('command-exists')
+const { json } = require('mrm-core')
 const cli = require('./cli')
 
 const pipeline = promisify(Stream.pipeline)
 
-const projects = {
+const templates = {
   'express-rest': 'https://github.com/danielfsousa/express-rest-boilerplate/archive/master.zip',
   'typescript-lib': 'https://github.com/danielfsousa/typescript-lib-starter/archive/main.zip',
   'monorepo-typescript-lib':
@@ -19,19 +21,31 @@ const projects = {
 }
 
 async function main() {
-  const { program, answers } = await cli.run(projects)
+  const { program, answers } = await cli.run(templates)
   const { template, projectDirectory } = answers
+  const isTemplateUrl = isGithubDownloadUrl(template)
   const directory = path.resolve(projectDirectory)
-  const zipfile = path.join(directory, `${template}.zip`)
+  const zipfile = path.join(directory, isTemplateUrl ? path.basename(template) : `${template}.zip`)
   const appName = path.basename(directory)
-  const url = projects[template]
+  const url = isTemplateUrl ? template : templates[template]
 
   if (!url) {
-    console.error(`${chalk.magenta(template)} is not a valid project`)
+    console.error(
+      chalk.red(
+        `\n${chalk.magentaBright(template)} is not a valid template or a valid github download url`
+      )
+    )
+
+    const availableTemplates = Object.keys(templates)
+      .map(t => chalk.magentaBright(t))
+      .join(', ')
+
+    console.log('\nAvailable templates:', availableTemplates)
     program.helpInformation()
     process.exit(1)
   }
 
+  checkAppName(appName)
   fs.ensureDirSync(directory)
   if (!isSafeToCreateProjectIn(directory, appName)) {
     process.exit(1)
@@ -52,6 +66,9 @@ async function main() {
   // and sets name and email fields in package.json from git config
   // it should update all packages if it's a monorepo
 
+  console.log('Configuring package.json...')
+  configurePackageJson(directory, appName)
+
   if (commandExistsSync('git')) {
     console.log('Initializing git...')
     execCommand(['git', 'init'], { cwd: directory })
@@ -68,8 +85,9 @@ async function main() {
     fs.unlinkSync(initScript)
   }
 
-  console.log(`\nDone! Created ${chalk.cyan(appName)} at ${chalk.green(directory)}\n`)
+  console.log(chalk.cyan('\nAvailable scripts:\n'))
   execCommand(['npm', 'run'], { cwd: directory })
+  console.log(`\nDone! Created ${chalk.cyan(appName)} at ${chalk.green(directory)}\n`)
 }
 
 async function downloadRepo(url, directory) {
@@ -85,9 +103,35 @@ function execCommand([command, ...args], { cwd }) {
   if (error) throw error
 }
 
+function configurePackageJson(directory, appName) {
+  const packageJsonDir = path.join(directory, 'package.json')
+  const pkg = json(packageJsonDir)
+
+  pkg.set('name', appName)
+  pkg.unset(['bugs', 'homepage', 'repository', 'keywords'])
+
+  if (pkg.get('version')) {
+    pkg.set('version', '0.1.0')
+  }
+
+  if (commandExistsSync('git')) {
+    const name = execSync('git config user.name', { encoding: 'utf8' }).trim()
+    const email = execSync('git config user.email', { encoding: 'utf8' }).trim()
+    pkg.set('author', { name, email })
+  } else {
+    pkg.set('author', '')
+  }
+
+  pkg.save()
+}
+
 function findInitScript(directory) {
   const paths = [path.join(directory, 'init.js'), path.join(directory, 'scripts', 'init.js')]
   return paths.map(fs.existsSync).find(Boolean)
+}
+
+function isGithubDownloadUrl(url) {
+  return /https?:\/\/github\.com\/\w+\/[\w-]+\/archive\/\w+.zip/.exec(url)
 }
 
 function isSafeToCreateProjectIn(directory, name) {
@@ -137,7 +181,6 @@ function isSafeToCreateProjectIn(directory, name) {
         console.log(`  ${file}`)
       }
     }
-    console.log()
     console.log('\nEither try using a new directory name, or remove the files listed above.')
 
     return false
@@ -151,6 +194,28 @@ function isSafeToCreateProjectIn(directory, name) {
   })
 
   return true
+}
+
+function checkAppName(appName) {
+  const { validForNewPackages, errors = [], warnings = [] } = validateProjectName(appName)
+  const errorsAndWarnings = [...errors, ...warnings]
+
+  if (!validForNewPackages) {
+    console.error(
+      chalk.red(
+        `Cannot create a project named ${chalk.green(
+          `"${appName}"`
+        )} because of npm naming restrictions:\n`
+      )
+    )
+
+    errorsAndWarnings.forEach(error => {
+      console.error(chalk.red(`  * ${error}`))
+    })
+
+    console.error(chalk.red('\nPlease choose a different project name.'))
+    process.exit(1)
+  }
 }
 
 module.exports = main

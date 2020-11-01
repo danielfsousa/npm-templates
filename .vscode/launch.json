@@ -9,14 +9,13 @@
       "request": "launch",
       "name": "Launch Program",
       "console": "integratedTerminal",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
+      "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/bin/create.js",
       "cwd": "/Users/danielsousa/Code/teste",
+      // "args": ["monorepo-typescript-lib", "test-lib"]
       "args": [
-        "monorepo-typescript-lib",
-        "test-lib"
+        "https://github.com/danielfsousa/monorepo-typescript-lib-starter/archive/main.zip",
+        "test-lib-url"
       ]
     }
   ]
