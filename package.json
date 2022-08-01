@@ -1,6 +1,6 @@
 {
   "name": "@danielfsousa/create",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Scripts to bootstrap my javascript/typescript templates using `npm init` command",
   "keywords": [
     "init",
