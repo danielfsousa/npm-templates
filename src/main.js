@@ -17,7 +17,8 @@ const templates = {
   'express-rest': 'https://github.com/danielfsousa/express-rest-boilerplate/archive/master.zip',
   'typescript-lib': 'https://github.com/danielfsousa/typescript-lib-starter/archive/main.zip',
   'monorepo-typescript-lib':
-    'https://github.com/danielfsousa/monorepo-typescript-lib-starter/archive/main.zip'
+    'https://github.com/danielfsousa/monorepo-typescript-lib-starter/archive/main.zip',
+  'commander-cli-ts': 'https://github.com/danielfsousa/commander-cli-starter-ts/archive/main.zip'
 }
 
 async function main() {
