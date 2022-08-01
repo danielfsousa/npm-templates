@@ -12,16 +12,8 @@ const getQuestions = projects => [
     type: 'select',
     name: 'template',
     message: 'Which template do you want to use?',
-    choices: Object.keys(projects)
-      .concat(['github repo'])
-      .map(p => ({ title: p, value: p })),
+    choices: Object.keys(projects).map(p => ({ title: p, value: p })),
     initial: 0
-  },
-  {
-    type: prev => (prev === 'github repo' ? 'text' : null),
-    name: 'templateUrl',
-    message: 'Specify the download URL of the github repo:',
-    initial: 'https://github.com/danielfsousa/monorepo-typescript-lib-starter/archive/main.zip'
   },
   {
     type: 'text',
@@ -44,7 +36,6 @@ async function run(projects) {
   })
 
   const answers = await prompts(getQuestions(projects))
-  answers.template = answers.template === 'github repo' ? answers.templateUrl : answers.template
 
   if (!answers.template || !answers.projectDirectory) {
     process.exit(1)
